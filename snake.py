@@ -1,0 +1,142 @@
+from collections import deque
+from doublylinkedlist import DoublyLinkedList, Node
+from random import randint
+import pyxel
+
+GAME_WINDOW_SIZE_WIDTH = 30
+GAME_WINDOW_SIZE_HEIGHT = 50
+GAME_TITLE = "Gumshoe's Snake Game OwO"
+GAME_FPS = 20
+GAME_BOUNDARY_WEST = 0
+GAME_BOUNDARY_EAST = 160
+GAME_BOUNDARY_NORTH = 0
+GAME_BOUNDARY_SOUTH = 120
+
+
+class Snake:
+    def __init__(self, posX, posY):
+        self.posX = posX
+        self.posY = posY
+        self.coords = DoublyLinkedList()
+        self.coords.insert_at_beginning({"x": posX, "y": posY})
+        self.direction = "left"
+
+
+class Apple:
+    def __init__(self):
+        self.posX = randint(2, 29)
+        self.posY = randint(2, 39)
+
+
+class Game:
+    def __init__(self):
+        pyxel.init(
+            width=GAME_WINDOW_SIZE_WIDTH,
+            height=GAME_WINDOW_SIZE_HEIGHT,
+            title=GAME_TITLE,
+            fps=GAME_FPS,
+            capture_scale=6,
+        )
+        self.score = 0
+        self.gameOver = False
+        self.snake = Snake(10, 10)
+        self.apple = Apple()
+        pyxel.run(self.update, self.draw)
+
+    def remove_tail(self):
+        curr = self.snake.coords.head
+        # If only one node, do not remove only node
+        if not curr or not curr.next:
+            return
+
+        while curr.next:
+            curr = curr.next
+
+        if curr.prev:
+            curr.prev.next = None
+
+    def apple_collected(self):
+        return (
+            self.apple.posX == self.snake.coords.head.data["x"]
+            and self.apple.posY == self.snake.coords.head.data["y"]
+        )
+
+    def set_snake_position(self):
+        if not self.gameOver:
+            head = self.snake.coords.head.data
+            x, y = head["x"], head["y"]
+
+            if self.snake.direction == "left":
+                x -= 1
+            elif self.snake.direction == "right":
+                x += 1
+            elif self.snake.direction == "up":
+                y -= 1
+            elif self.snake.direction == "down":
+                y += 1
+
+            # Insert new head
+            self.snake.coords.insert_at_beginning({"x": x, "y": y})
+            self.snake.posX = x
+            self.snake.posY = y
+
+            # Remove tail if no apple collected, standard movement
+            if not self.apple_collected():
+                self.remove_tail()
+            else:
+                self.score += 1
+                self.apple.posX = randint(1, 29)
+                self.apple.posY = randint(1, 39)
+
+    def get_player_input(self):
+        if pyxel.btn(pyxel.KEY_A) and self.snake.direction != "right":
+            self.snake.direction = "left"
+        if pyxel.btn(pyxel.KEY_D) and self.snake.direction != "left":
+            self.snake.direction = "right"
+        if pyxel.btn(pyxel.KEY_W) and self.snake.direction != "down":
+            self.snake.direction = "up"
+        if pyxel.btn(pyxel.KEY_S) and self.snake.direction != "up":
+            self.snake.direction = "down"
+
+    def spawn_apple(self):
+        pyxel.rect(self.apple.posX, self.apple.posY, 1, 1, 8)
+
+    def spawn_snake(self):
+        curr = self.snake.coords.head
+        while curr:
+            if not curr.prev:
+                pyxel.rect(curr.data["x"], curr.data["y"], 1, 1, 3)
+            else:
+                pyxel.rect(curr.data["x"], curr.data["y"], 1, 1, 11)
+            curr = curr.next
+
+    def snake_hit_wall(self):
+        head = self.snake.coords.head.data
+        x, y = head["x"], head["y"]
+        return x < 0 or x >= pyxel.width or y < 0 or y >= pyxel.height
+
+    def check_game_over(self):
+        if self.snake_hit_wall():
+            self.gameOver = True
+
+    def update(self):
+        if not self.gameOver:
+            self.get_player_input()
+            self.set_snake_position()
+            self.check_game_over()
+            # self.handle_game_over()
+
+    def draw_score(self):
+        pyxel.text(1, 1, f"{self.score}", 10)
+
+    def draw(self):
+        pyxel.cls(0)
+        self.draw_score()
+        self.spawn_snake()
+        self.spawn_apple()
+
+        if self.gameOver:
+            pyxel.rect(4, 4, 1, 1, 3)
+
+
+Game()
