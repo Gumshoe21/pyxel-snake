@@ -11,6 +11,7 @@ GAME_BOUNDARY_WEST = 0
 GAME_BOUNDARY_EAST = 160
 GAME_BOUNDARY_NORTH = 0
 GAME_BOUNDARY_SOUTH = 120
+GAME_HUD_HEIGHT = 7
 
 
 class Snake:
@@ -24,8 +25,11 @@ class Snake:
 
 class Apple:
     def __init__(self):
-        self.posX = randint(2, 29)
-        self.posY = randint(2, 39)
+        self.draw_random_apple()
+
+    def draw_random_apple(self):
+        self.posX = randint(2, pyxel.width)
+        self.posY = randint(GAME_HUD_HEIGHT + 1, pyxel.height - 2)
 
 
 class Game:
@@ -85,8 +89,7 @@ class Game:
                 self.remove_tail()
             else:
                 self.score += 1
-                self.apple.posX = randint(1, 29)
-                self.apple.posY = randint(1, 39)
+                self.apple.draw_random_apple()
 
     def get_player_input(self):
         if pyxel.btn(pyxel.KEY_A) and self.snake.direction != "right":
@@ -113,10 +116,21 @@ class Game:
     def snake_hit_wall(self):
         head = self.snake.coords.head.data
         x, y = head["x"], head["y"]
-        return x < 0 or x >= pyxel.width or y < 0 or y >= pyxel.height
+        return x < 0 or x >= pyxel.width or y < GAME_HUD_HEIGHT + 1 or y >= pyxel.height
+
+    def snake_hit_self(self):
+        curr = self.snake.coords.head.next
+        while curr:
+            if (
+                curr.data["x"] == self.snake.coords.head.data["x"]
+                and curr.data["y"] == self.snake.coords.head.data["y"]
+            ):
+                self.gameOver = True
+            else:
+                curr = curr.next
 
     def check_game_over(self):
-        if self.snake_hit_wall():
+        if self.snake_hit_wall() or self.snake_hit_self():
             self.gameOver = True
 
     def update(self):
@@ -129,14 +143,15 @@ class Game:
     def draw_score(self):
         pyxel.text(1, 1, f"{self.score}", 10)
 
+    def draw_hud(self):
+        pyxel.rect(0, 0, pyxel.width, GAME_HUD_HEIGHT, 1)
+
     def draw(self):
         pyxel.cls(0)
+        self.draw_hud()
         self.draw_score()
         self.spawn_snake()
         self.spawn_apple()
-
-        if self.gameOver:
-            pyxel.rect(4, 4, 1, 1, 3)
 
 
 Game()
