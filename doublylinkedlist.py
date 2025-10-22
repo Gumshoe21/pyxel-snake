@@ -1,19 +1,16 @@
-# Node class for a doubly linked list
 class Node:
     def __init__(self, data):
-        self.data = data  # The actual data stored in the node
-        self.next = None  # Pointer to the next node
-        self.prev = None  # Pointer to the previous node
+        self.data = data
+        self.next = None
+        self.prev = None
 
 
-# Doubly Linked List class
 class DoublyLinkedList:
     def __init__(self):
-        self.head = None  # Initially, the list is empty
+        self.head = None
 
-    # Insert a node at the beginning
     def insert_at_beginning(self, data):
-        new_node = Node(data)  # Create a new node
+        new_node = Node(data)
         new_node.next = self.head  # New node points forward to old head
 
         if self.head is not None:
