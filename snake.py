@@ -40,11 +40,8 @@ class Snake:
 
 class Apple:
     def __init__(self):
-        self.draw_random_apple()
-
-    def draw_random_apple(self):
-        self.posX = randint(2, pyxel.width)
-        self.posY = randint(GAME_HUD_HEIGHT + 1, pyxel.height - 2)
+        self.posX = 0
+        self.posY = 0
 
 
 class Game:
@@ -61,6 +58,10 @@ class Game:
         self.snake = Snake(10, 10)
         self.apple = Apple()
         pyxel.run(self.update, self.draw)
+
+    def draw_random_apple(self):
+        self.apple.posX = randint(2, pyxel.width)
+        self.apple.posY = randint(GAME_HUD_HEIGHT + 1, pyxel.height - 2)
 
     def remove_tail(self):
         curr = self.snake.coords.head
@@ -104,7 +105,7 @@ class Game:
                 self.remove_tail()
             else:
                 self.score += 1
-                self.apple.draw_random_apple()
+                self.draw_random_apple()
 
     def get_player_input(self):
         if pyxel.btn(pyxel.KEY_A) and self.snake.direction != "right":
