@@ -3,8 +3,9 @@ from doublylinkedlist import DoublyLinkedList, Node
 from random import randint
 import pyxel
 
-GAME_WINDOW_SIZE_WIDTH = 30
-GAME_WINDOW_SIZE_HEIGHT = 50
+# Game constants
+GAME_WIDTH = 30
+GAME_HEIGHT = 50
 GAME_TITLE = "Gumshoe's Snake Game OwO"
 GAME_FPS = 20
 GAME_HUD_HEIGHT = 7
@@ -49,8 +50,8 @@ class Apple:
 class Game:
     def __init__(self):
         pyxel.init(
-            width=GAME_WINDOW_SIZE_WIDTH,
-            height=GAME_WINDOW_SIZE_HEIGHT,
+            width=GAME_WIDTH,
+            height=GAME_HEIGHT,
             title=GAME_TITLE,
             fps=GAME_FPS,
             capture_scale=6,
